@@ -1,0 +1,15 @@
+artifact_uri: file:///D:/End-to-end-Machine-Learning-Project-with-ML-flow/mlruns/0/8887fef27fd0465eb6a7dd005d7082c2/artifacts
+end_time: 1774914539016
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 8887fef27fd0465eb6a7dd005d7082c2
+run_name: exultant-sponge-780
+run_uuid: 8887fef27fd0465eb6a7dd005d7082c2
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1774914535590
+status: 3
+tags: []
+user_id: ramch

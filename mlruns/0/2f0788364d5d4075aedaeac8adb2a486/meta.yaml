@@ -1,0 +1,15 @@
+artifact_uri: file:///D:/End-to-end-Machine-Learning-Project-with-ML-flow/mlruns/0/2f0788364d5d4075aedaeac8adb2a486/artifacts
+end_time: 1774914317235
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 2f0788364d5d4075aedaeac8adb2a486
+run_name: lyrical-colt-319
+run_uuid: 2f0788364d5d4075aedaeac8adb2a486
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1774914312952
+status: 4
+tags: []
+user_id: ramch

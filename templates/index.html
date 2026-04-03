@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="Wine Quality Prediction Web App" />
+    <title>Wine Quality Prediction</title>
+    <link rel="icon" type="image/x-icon" href="static/assets/favicon.ico" />
+
+    <!-- Font Awesome -->
+    <script src="https://use.fontawesome.com/releases/v5.15.3/js/all.js" crossorigin="anonymous"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400;1,700&family=Open+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <style>
+        /* ── Base ── */
+        :root {
+            --wine-red:    #8b1a2e;
+            --wine-dark:   #5a0f1d;
+            --wine-light:  #c9445d;
+            --gold:        #c9a84c;
+            --cream:       #fdf6ec;
+            --text-dark:   #2c1a20;
+            --text-muted:  #7a6672;
+            --border:      #e8d5c4;
+            --shadow:      0 8px 32px rgba(139,26,46,0.13);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background: var(--cream);
+            color: var(--text-dark);
+            min-height: 100vh;
+        }
+
+        /* ── Navbar ── */
+        #mainNav {
+            background: rgba(255,255,255,0.96);
+            backdrop-filter: blur(8px);
+            border-bottom: 2px solid var(--border);
+            padding: 0.75rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 12px rgba(139,26,46,0.08);
+        }
+
+        #mainNav .navbar-brand {
+            font-family: 'Lora', serif;
+            font-size: 1.4rem;
+            color: var(--wine-red);
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+        #mainNav .navbar-brand:hover { color: var(--wine-dark); }
+
+        #mainNav .nav-link {
+            font-weight: 600;
+            font-size: 0.85rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            transition: color 0.2s;
+        }
+        #mainNav .nav-link:hover { color: var(--wine-red); }
+
+        /* ── Hero Header ── */
+        .masthead {
+            background-image: linear-gradient(
+                135deg,
+                rgba(90,15,29,0.88) 0%,
+                rgba(139,26,46,0.75) 50%,
+                rgba(201,68,93,0.60) 100%
+            ), url('static/assets/img/wine.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            padding: 7rem 0 5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .masthead::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        .masthead .site-heading {
+            text-align: center;
+            position: relative;
+        }
+
+        .masthead h1 {
+            font-family: 'Lora', serif;
+            font-size: clamp(2.2rem, 5vw, 3.8rem);
+            font-weight: 700;
+            color: #fff;
+            text-shadow: 0 2px 20px rgba(0,0,0,0.4);
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.01em;
+        }
+
+        .masthead .subheading {
+            font-family: 'Open Sans', sans-serif;
+            font-size: 1rem;
+            font-weight: 300;
+            color: rgba(255,255,255,0.85);
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            display: block;
+        }
+
+        .masthead .wine-badge {
+            display: inline-block;
+            margin-top: 1.5rem;
+            padding: 0.4rem 1.2rem;
+            border: 1px solid rgba(201,168,76,0.6);
+            border-radius: 50px;
+            color: var(--gold);
+            font-size: 0.78rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+        }
+
+        /* ── Main Content Wrapper ── */
+        .main-content {
+            padding: 4rem 0 5rem;
+        }
+
+        /* ── Form Card ── */
+        .form-card {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: var(--shadow), 0 1px 0 var(--border);
+            overflow: hidden;
+            max-width: 780px;
+            margin: 0 auto;
+            border: 1px solid var(--border);
+        }
+
+        .form-card-header {
+            background: linear-gradient(135deg, var(--wine-red), var(--wine-dark));
+            padding: 2rem 2.5rem 1.8rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .form-card-header::after {
+            content: '🍷';
+            position: absolute;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 3.5rem;
+            opacity: 0.18;
+        }
+
+        .form-card-header h2 {
+            font-family: 'Lora', serif;
+            color: #fff;
+            font-size: 1.5rem;
+            margin: 0 0 0.25rem;
+            font-weight: 700;
+        }
+
+        .form-card-header p {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.85rem;
+            margin: 0;
+            letter-spacing: 0.05em;
+        }
+
+        .form-card-body {
+            padding: 2.2rem 2.5rem 2.5rem;
+        }
+
+        /* ── Form Fields ── */
+        .field-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .field-group label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 0.45rem;
+        }
+
+        .field-group .input-icon-wrap {
+            position: relative;
+        }
+
+        .field-group .field-icon {
+            position: absolute;
+            left: 0.9rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--wine-light);
+            font-size: 0.8rem;
+            pointer-events: none;
+        }
+
+        .field-group input[type="text"],
+        .field-group input[type="number"] {
+            width: 100%;
+            padding: 0.65rem 0.9rem 0.65rem 2.2rem;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            font-family: 'Open Sans', sans-serif;
+            font-size: 0.88rem;
+            color: var(--text-dark);
+            background: var(--cream);
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+            outline: none;
+        }
+
+        .field-group input[type="text"]:focus,
+        .field-group input[type="number"]:focus {
+            border-color: var(--wine-light);
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(201,68,93,0.12);
+        }
+
+        .field-group input::placeholder {
+            color: #c5b5bb;
+            font-style: italic;
+        }
+
+        /* ── Section Divider ── */
+        .section-label {
+            font-size: 0.7rem;
+            font-weight: 800;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--wine-red);
+            padding: 0.2rem 0.7rem;
+            background: rgba(139,26,46,0.07);
+            border-left: 3px solid var(--wine-red);
+            border-radius: 0 5px 5px 0;
+            margin-bottom: 1.2rem;
+            margin-top: 0.5rem;
+            display: inline-block;
+        }
+
+        /* ── Submit Button ── */
+        .btn-predict {
+            width: 100%;
+            padding: 0.9rem;
+            background: linear-gradient(135deg, var(--wine-red), var(--wine-dark));
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Open Sans', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: transform 0.18s, box-shadow 0.18s;
+            box-shadow: 0 4px 18px rgba(139,26,46,0.35);
+            margin-top: 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-predict::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.08), transparent);
+        }
+
+        .btn-predict:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(139,26,46,0.45);
+        }
+
+        .btn-predict:active { transform: translateY(0); }
+
+        .btn-predict i { margin-right: 0.5rem; }
+
+        /* ── Info Cards ── */
+        .info-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            max-width: 780px;
+            margin: 2.5rem auto 0;
+        }
+
+        .info-card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.2rem 1.3rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.9rem;
+            box-shadow: 0 2px 10px rgba(139,26,46,0.05);
+        }
+
+        .info-card-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--wine-red), var(--wine-light));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .info-card-text strong {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 0.15rem;
+        }
+
+        .info-card-text span {
+            font-size: 0.73rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* ── Footer ── */
+        footer {
+            background: var(--text-dark);
+            color: rgba(255,255,255,0.6);
+            padding: 2.5rem 0;
+            margin-top: 3rem;
+            border-top: 3px solid var(--wine-red);
+        }
+
+        footer .fa-stack { color: rgba(255,255,255,0.15); transition: color 0.2s; }
+        footer .fa-stack:hover { color: var(--wine-light); }
+        footer .fa-circle { color: inherit; }
+        footer .fa-inverse { color: #fff !important; }
+
+        footer .footer-copy {
+            font-family: 'Lora', serif;
+            font-style: italic;
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.35);
+            margin-top: 1rem;
+        }
+
+        /* ── Utility ── */
+        .row-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+        @media (max-width: 540px) {
+            .row-2col { grid-template-columns: 1fr; gap: 0; }
+            .form-card-body { padding: 1.5rem; }
+            .form-card-header { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ── Navigation ── -->
+    <nav class="navbar navbar-expand-lg" id="mainNav">
+        <div class="container px-4 px-lg-5">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-wine-glass-alt me-2" style="color:var(--wine-red)"></i>Wine Quality
+            </a>
+            <button class="navbar-toggler" type="button"
+                data-bs-toggle="collapse" data-bs-target="#navbarResponsive"
+                aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                Menu <i class="fas fa-bars ms-1"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                <ul class="navbar-nav ms-auto py-4 py-lg-0">
+                    <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="/about">About</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ── Hero Header ── -->
+    <header class="masthead">
+        <div class="container position-relative px-4 px-lg-5">
+            <div class="row gx-4 gx-lg-5 justify-content-center">
+                <div class="col-md-10 col-lg-8 col-xl-7">
+                    <div class="site-heading">
+                        <h1>Wine Quality Prediction</h1>
+                        <span class="subheading">ML-Powered Quality Analysis</span>
+                        <div class="wine-badge">✦ Enter Chemical Parameters Below ✦</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ── Main Content ── -->
+    <main class="main-content">
+        <div class="container px-4 px-lg-5">
+
+            <!-- Form Card -->
+            <div class="form-card">
+                <div class="form-card-header">
+                    <h2>Chemical Analysis Form</h2>
+                    <p>Fill in all parameters to receive a quality prediction</p>
+                </div>
+                <div class="form-card-body">
+                    <form action="/predict" method="post">
+
+                        <div class="section-label">Acidity Profile</div>
+                        <div class="row-2col">
+                            <div class="field-group">
+                                <label for="fixed_acidity">Fixed Acidity</label>
+                                <div class="input-icon-wrap">
+                                    <i class="fas fa-flask field-icon"></i>
+                                    <input type="text" name="fixed_acidity" id="fixed_acidity"
+                                        placeholder="e.g. 7.4" required>
+                                </div>
+                            </div>
+                            <div class="field-group">
+                                <label for="volatile_acidity">Volatile Acidity</label>
+                                <div class="input-icon-wrap">
+                                    <i class="fas fa-flask field-icon"></i>
+                                    <input type="text" name="volatile_acidity" id="volatile_acidity"
+                                        placeholder="e.g. 0.70" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row-2col">
+                            <div class="field-group">
+                                <label for="citric_acid">Citric Acid</label>
+                                <div class="input-icon-wrap">
+                                    <i class="fas fa-atom field-icon"></i>
+                                    <input type="text" name="citric_acid" id="citric_acid"
+                                        placeholder="e.g. 0.00" required>
+                                </div>
+                            </div>
+                            <div class="field-group">
+                                <label for="pH">pH Level</label>
+                                <div class="input-icon-wrap">
+                                    <i class="fas fa-tint field-icon"></i>
+                                    <input type="text" name="pH" id="pH"
+                                        placeholder="e.g. 3.51" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section-label">Sugar &amp; Minerals</div>
+                        <div class="row-2col">
+                            <div class="field-group">
+                                <label for="residual_sugar">Residual Sugar</label>
+                                <div class="input-icon-wrap">
+                                    <i class="fas fa-candy-cane field-icon"></i>
+                                    <input type="text" name="residual_sugar" id="residual_sugar"
+                                        placeholder="e.g. 1.9" required>
+                                </div>
+                            </div>
+                            <div class="field-group">
+                                <label for="chlorides">Chlorides</label>
+                                <div class="input-icon-wrap">
+                                    <i class="fas fa-vial field-icon"></i>
+                                    <input type="text" name="chlorides" id="chlorides"
+                                        placeholder="e.g. 0.076" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row-2col">
+                            <div class="field-group">
+                                <label for="density">Density</label>
+                                <div class="input-icon-wrap">
+                                    <i class="fas fa-weight field-icon"></i>
+                                    <input type="text" name="density" id="density"
+                                        placeholder="e.g. 0.9978" required>
+                                </div>
+                            </div>
+                            <div class="field-group">
+                                <label for="sulphates">Sulphates</label>
+                                <div class="input-icon-wrap">
+                                    <i class="fas fa-microscope field-icon"></i>
+                                    <input type="text" name="sulphates" id="sulphates"
+                                        placeholder="e.g. 0.56" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section-label">Sulfur Dioxide &amp; Alcohol</div>
+                        <div class="row-2col">
+                            <div class="field-group">
+                                <label for="free_sulfur_dioxide">Free Sulfur Dioxide</label>
+                                <div class="input-icon-wrap">
+                                    <i class="fas fa-wind field-icon"></i>
+                                    <input type="text" name="free_sulfur_dioxide" id="free_sulfur_dioxide"
+                                        placeholder="e.g. 11.0" required>
+                                </div>
+                            </div>
+                            <div class="field-group">
+                                <label for="total_sulfur_dioxide">Total Sulfur Dioxide</label>
+                                <div class="input-icon-wrap">
+                                    <i class="fas fa-wind field-icon"></i>
+                                    <input type="text" name="total_sulfur_dioxide" id="total_sulfur_dioxide"
+                                        placeholder="e.g. 34.0" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="field-group" style="max-width:380px">
+                            <label for="alcohol">Alcohol (%)</label>
+                            <div class="input-icon-wrap">
+                                <i class="fas fa-wine-bottle field-icon"></i>
+                                <input type="text" name="alcohol" id="alcohol"
+                                    placeholder="e.g. 9.4" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-predict">
+                            <i class="fas fa-magic"></i> Predict Wine Quality
+                        </button>
+
+                    </form>
+                </div>
+            </div>
+
+            <!-- Info Cards -->
+            <div class="info-row">
+                <div class="info-card">
+                    <div class="info-card-icon"><i class="fas fa-brain"></i></div>
+                    <div class="info-card-text">
+                        <strong>ML-Powered</strong>
+                        <span>Trained on thousands of wine samples for accurate prediction</span>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <div class="info-card-icon"><i class="fas fa-chart-bar"></i></div>
+                    <div class="info-card-text">
+                        <strong>11 Parameters</strong>
+                        <span>Comprehensive chemical profile analysis for quality scoring</span>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <div class="info-card-icon"><i class="fas fa-bolt"></i></div>
+                    <div class="info-card-text">
+                        <strong>Instant Results</strong>
+                        <span>Get quality predictions in milliseconds</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- ── Footer ── -->
+    <footer class="border-top">
+        <div class="container px-4 px-lg-5">
+            <div class="row gx-4 gx-lg-5 justify-content-center">
+                <div class="col-md-10 col-lg-8 col-xl-7 text-center">
+                    <ul class="list-inline mb-3">
+                        <li class="list-inline-item">
+                            <a href="https://www.linkedin.com/in/boktiarahmed73/" target="_blank">
+                                <span class="fa-stack fa-lg">
+                                    <i class="fas fa-circle fa-stack-2x"></i>
+                                    <i class="fab fa-linkedin fa-stack-1x fa-inverse"></i>
+                                </span>
+                            </a>
+                        </li>
+                        <li class="list-inline-item">
+                            <a href="https://www.youtube.com/dswithbappy" target="_blank">
+                                <span class="fa-stack fa-lg">
+                                    <i class="fas fa-circle fa-stack-2x"></i>
+                                    <i class="fab fa-youtube fa-stack-1x fa-inverse"></i>
+                                </span>
+                            </a>
+                        </li>
+                        <li class="list-inline-item">
+                            <a href="https://github.com/entbappy" target="_blank">
+                                <span class="fa-stack fa-lg">
+                                    <i class="fas fa-circle fa-stack-2x"></i>
+                                    <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+                                </span>
+                            </a>
+                        </li>
+                    </ul>
+                    <p class="footer-copy">Wine Quality Prediction App — Powered by Machine Learning</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
