@@ -14,7 +14,7 @@ The model is an **ElasticNet regression** (`alpha=0.1`, `l1_ratio=0.2`), chosen 
 L1/L2 regularization, which handles the correlated, low-dimensional feature set in this dataset
 well without overfitting.
 
-**Results:** `[ADD: validation/test RMSE, MAE, and R² from your MLflow run]`
+**Results:** RMSE 0.712, MAE 0.555, R² 0.261 on the held-out test set (tracked via MLflow on DagsHub).
 
 ## Architecture
 
@@ -90,8 +90,20 @@ ECR_REPOSITORY_NAME
 
 ## What I'd improve next
 
-`[ADD: e.g., compare against a tree-based model (Random Forest / XGBoost) as a baseline,
-add automated tests for the pipeline components, add a model registry stage in MLflow]`
+- **Benchmark against tree-based models** (Random Forest, XGBoost) as a baseline — ElasticNet
+  assumes a linear relationship between the physicochemical features and quality, which may
+  not hold; a tree-based model would show whether the linear assumption is actually costing
+  accuracy.
+- **Add automated tests** for each pipeline stage (ingestion, validation, transformation)
+  so a schema or data change fails fast instead of silently breaking training.
+- **Add a model registry stage in MLflow** to version and promote models (staging →
+  production) instead of just logging metrics, which is closer to how this would run in
+  a real team setting.
+- **Add input validation on the Flask app** so out-of-range or malformed feature values are
+  rejected with a clear error instead of passed straight to the model.
+- **Track data drift** between the training distribution and incoming prediction requests,
+  since a model trained on this fixed dataset will degrade if real-world wine chemistry
+  inputs shift over time.
 
 ## Dataset
 
