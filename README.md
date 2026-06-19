@@ -1,167 +1,99 @@
-# Wine-Tasting-End-to-End
+# Wine Quality Prediction — End-to-End ML Pipeline
 
+A reproducible machine learning pipeline that predicts wine quality from physicochemical
+properties using an ElasticNet regression model, with full experiment tracking, containerized
+deployment, and CI/CD to AWS.
 
-## Workflows
+## What it does
 
-1. Update config.yaml
-2. Update schema.yaml
-3. Update params.yaml
-4. Update the entity
-5. Update the configuration manager in src config
-6. Update the components
-7. Update the pipeline 
-8. Update the main.py
-9. Update the app.py
+Predicts a wine's quality score (0–10) from 11 physicochemical properties: fixed acidity,
+volatile acidity, citric acid, residual sugar, chlorides, free sulfur dioxide, total sulfur
+dioxide, density, pH, sulphates, and alcohol (UCI Wine Quality dataset).
 
+The model is an **ElasticNet regression** (`alpha=0.1`, `l1_ratio=0.2`), chosen for its combined
+L1/L2 regularization, which handles the correlated, low-dimensional feature set in this dataset
+well without overfitting.
 
-# How to run?
-### STEPS:
+**Results:** `[ADD: validation/test RMSE, MAE, and R² from your MLflow run]`
 
-Clone the repository
+## Architecture
 
-```bash
-https://github.com/ramcharan1904/Wine-Tasting-End-to-End
 ```
-### STEP 01- Create a conda environment after opening the repository
+Raw data → Schema validation (schema.yaml) → Train/test split
+        → ElasticNet training (params.yaml) → Evaluation, logged to MLflow (via DagsHub)
+        → Flask inference app (app.py) → Docker container
+        → Pushed to AWS ECR → Deployed on EC2 via GitHub Actions
+```
+
+## Tech stack
+
+Python, scikit-learn, MLflow, DagsHub, Flask, Docker, AWS (EC2, ECR), GitHub Actions
+
+## Project structure
+
+```
+config/             # config.yaml — paths and pipeline settings
+params.yaml         # model hyperparameters
+schema.yaml         # expected input schema and target column
+src/mlproject/      # pipeline components: ingestion, validation, transformation, training, evaluation
+research/           # exploratory notebooks
+app.py              # Flask inference app
+main.py             # pipeline entry point
+Dockerfile          # container definition for deployment
+```
+
+## Running it locally
 
 ```bash
+git clone https://github.com/ramcharan1904/Wine-Tasting-End-to-End
+cd Wine-Tasting-End-to-End
+
 conda create -n mlproj python=3.8 -y
-```
-
-```bash
 conda activate mlproj
-```
 
-
-### STEP 02- install the requirements
-```bash
 pip install -r requirements.txt
+
+python main.py    # runs the training pipeline
+python app.py     # starts the Flask app — open the local host/port shown in the terminal
 ```
 
+## Experiment tracking (MLflow + DagsHub)
+
+Runs are tracked remotely via [DagsHub](https://dagshub.com). **Never commit real credentials —
+set these as environment variables instead:**
 
 ```bash
-# Finally run the following command
-python app.py
+export MLFLOW_TRACKING_URI=https://dagshub.com/<your_username>/Wine-Tasting-End-to-End.mlflow
+export MLFLOW_TRACKING_USERNAME=<your_username>
+export MLFLOW_TRACKING_PASSWORD=<your_dagshub_token>
+
+mlflow ui
 ```
 
-Now,
-```bash
-open up you local host and port
-```
+## Deployment (AWS EC2 + GitHub Actions)
 
+On push to `main`, GitHub Actions builds the Docker image, pushes it to Amazon ECR, and a
+self-hosted runner on the EC2 instance pulls the latest image and restarts the container.
 
+Required IAM policies: `AmazonEC2ContainerRegistryFullAccess`, `AmazonEC2FullAccess`
 
-## MLflow
-
-[Documentation](https://mlflow.org/docs/latest/index.html)
-
-
-##### cmd
-- mlflow ui
-
-### dagshub
-[dagshub](https://dagshub.com/)
-
-MLFLOW_TRACKING_URI=https://dagshub.com/ramcharangubbala7/Wine-Tasting-End-to-End.mlflow \
-MLFLOW_TRACKING_USERNAME=ramcharangubbala7 \
-MLFLOW_TRACKING_PASSWORD=password \
-python script.py
-
-Run this to export as env variables:
-
-```bash
-
-export MLFLOW_TRACKING_URI=https://dagshub.com/ramcharangubbala7/Wine-Tasting-End-to-End.mlflow
-
-export MLFLOW_TRACKING_USERNAME=ramcharangubbala7 
-
-export MLFLOW_TRACKING_PASSWORD=password
+Required GitHub repo secrets (**Settings → Secrets → Actions** — never hardcode these anywhere
+in the repo):
 
 ```
+AWS_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY
+AWS_REGION
+AWS_ECR_LOGIN_URI
+ECR_REPOSITORY_NAME
+```
 
+## What I'd improve next
 
+`[ADD: e.g., compare against a tree-based model (Random Forest / XGBoost) as a baseline,
+add automated tests for the pipeline components, add a model registry stage in MLflow]`
 
-# AWS-CICD-Deployment-with-Github-Actions
+## Dataset
 
-## 1. Login to AWS console.
-
-## 2. Create IAM user for deployment
-
-	#with specific access
-
-	1. EC2 access : It is virtual machine
-
-	2. ECR: Elastic Container registry to save your docker image in aws
-
-
-	#Description: About the deployment
-
-	1. Build docker image of the source code
-
-	2. Push your docker image to ECR
-
-	3. Launch Your EC2 
-
-	4. Pull Your image from ECR in EC2
-
-	5. Lauch your docker image in EC2
-
-	#Policy:
-
-	1. AmazonEC2ContainerRegistryFullAccess
-
-	2. AmazonEC2FullAccess
-
-	
-## 3. Create ECR repo to store/save docker image
-    - Save the URI: 512083376488.dkr.ecr.ap-northeast-2.amazonaws.com/mlproj
-
-	
-## 4. Create EC2 machine (Ubuntu) 
-
-## 5. Open EC2 and Install docker in EC2 Machine:
-	
-	
-	#optinal
-
-	sudo apt-get update -y
-
-	sudo apt-get upgrade
-	
-	#required
-
-	curl -fsSL https://get.docker.com -o get-docker.sh
-
-	sudo sh get-docker.sh
-
-	sudo usermod -aG docker ubuntu
-
-	newgrp docker
-	
-# 6. Configure EC2 as self-hosted runner:
-    setting>actions>runner>new self hosted runner> choose os> then run command one by one
-
-
-# 7. Setup github secrets:
-
-    AWS_ACCESS_KEY_ID=
-
-    AWS_SECRET_ACCESS_KEY=
-
-    AWS_REGION = ap-northeast-2
-
-    AWS_ECR_LOGIN_URI = demo>>  566373416292.dkr.ecr.ap-south-1.amazonaws.com
-
-    ECR_REPOSITORY_NAME = mlproj
-
-
-
-
-## About MLflow 
-MLflow
-
- - Its Production Grade
- - Trace all of your expriements
- - Logging & tagging your model
-
-
+[UCI Wine Quality dataset](https://archive.ics.uci.edu/dataset/186/wine+quality) —
+physicochemical properties and expert quality ratings for red and white wine samples.
